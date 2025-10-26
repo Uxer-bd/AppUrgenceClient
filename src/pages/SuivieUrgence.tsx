@@ -32,7 +32,6 @@ interface UrgenceData {
   description: string;
 }
 
-// Interface pour le "state" de l'objet location de react-router
 // On rend `urgenceData` optionnel avec `?` pour que TypeScript ne se plaigne pas
 interface LocationState {
   urgenceData?: UrgenceData;
@@ -61,6 +60,10 @@ const SuivieUrgence: React.FC = () => {
     { name: 'Arrivé', icon: timeOutline, status: '', active: false },
     { name: 'Terminée', icon: buildOutline, status: '', active: false },
   ];
+
+  const handleAppeler = () => {
+    window.location.href = 'tel:0800123456';
+  };
 
   return (
     <IonPage>
@@ -152,6 +155,7 @@ const SuivieUrgence: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-around' }}>
             <IonButton
               style={{ '--background': '#eb445a', '--border-radius': '10px', flex: 1, marginRight: '5px' }}
+              onClick={handleAppeler}
             >
               <IonIcon slot="start" icon={call} />
               Appeler
@@ -159,8 +163,8 @@ const SuivieUrgence: React.FC = () => {
             <IonButton
               fill="outline"
               style={{
-                '--border-color': '#eb445a',
-                '--color': '#eb445a',
+                '--border-color': '#ff0123ff',
+                '--color': '#fcb0baff',
                 '--border-radius': '10px',
                 flex: 1,
                 marginLeft: '5px',

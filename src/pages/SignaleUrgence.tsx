@@ -4,7 +4,7 @@ import {
   IonLabel, IonInput, IonButton, IonIcon, IonGrid, IonRow, IonCol, useIonToast, IonTextarea
 } from '@ionic/react';
 import { camera, locate, } from 'ionicons/icons';
-import { Zap, Gauge, Power, Cable, AlertCircle } from 'lucide-react';
+import { Zap, Gauge, Power, Cable, AlertCircle, MapPin } from 'lucide-react';
 import { useHistory } from 'react-router-dom';
 
 const SignalerUrgence: React.FC = () => {
@@ -47,20 +47,23 @@ const SignalerUrgence: React.FC = () => {
 
 
 
-  const buttonStyle = (type: string) => ({
-    '--border-color': problemType === type ? '#3880ff' : '#ddd',
-    '--border-width': problemType === type ? '2px' : '1px',
-    '--background': problemType === type ? 'rgba(56, 128, 255, 0.1)' : '#fff',
-    '--color': '#333',
-    '--border-radius': '10px',
-    '--box-shadow': 'none',
-    height: '100px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textTransform: 'none'
-  });
+  const buttonStyle = (type: string) => {
+    const style: Record<string, string | number | undefined> = {
+      borderRadius: '10px',
+      height: '100px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      textTransform: 'none',
+      // Slight visual lift when selected
+      boxShadow: problemType === type ? '0 2px 6px rgba(0,0,0,0.15)' : undefined,
+    };
+    // Use Ionic CSS variables so the IonButton respects the colors
+    style['--background'] = problemType === type ? '#adcbffff' : '#f4f5f8';
+    style['--color'] = problemType === type ? '#000' : '#666';
+    return style as React.CSSProperties;
+  };
 
 
   return (
@@ -96,45 +99,57 @@ const SignalerUrgence: React.FC = () => {
           </IonItem>
           <IonItem lines="full" style={{ '--background': '#fff', borderRadius: '10px', marginBottom: '15px' }}>
             <IonLabel position="floating" style={{ marginBottom : '15px' }}>Adresse</IonLabel>
-            <IonInput
-              type="text"
-              placeholder="Entrez votre adresse"
-              value={adresse}
-              onIonChange={e => setAdresse(e.detail.value!)}
-            ></IonInput>
-            <IonButton slot="end" fill="clear">
-              <IonIcon icon={locate} />
-              GPS
-            </IonButton>
+            <IonGrid>
+              <IonRow>
+                <IonCol size="9">
+                  <IonInput
+                    type="text"
+                    placeholder="Entrez votre adresse"
+                    value={adresse}
+                    onIonChange={e => setAdresse(e.detail.value!)}
+                  ></IonInput>
+                </IonCol>
+                <IonCol size="3" style={{ backgroundcolor:'primary' }}>
+                  <IonButton color='primary'>
+                    <MapPin style={{ fontSize:'2em' }} />
+                    GPS
+                  </IonButton>
+                </IonCol>
+              </IonRow>
+            </IonGrid>
           </IonItem>
 
           <IonLabel style={{ display: 'block', marginBottom: '10px', marginTop: '20px', fontWeight: 'bold' }}>Type de problème *</IonLabel>
           <IonGrid>
             <IonRow>
-              <IonCol size="3">
-                <IonButton color='light' expand="block" style={buttonStyle('Panne Courant')} onClick={() => setProblemType('Panne Courant')}>
+              <IonCol size="6">
+                <IonButton type="button" expand="block" style={buttonStyle('Panne Courant')} onClick={() => setProblemType('Panne Courant')} aria-pressed={problemType === 'Panne Courant'}>
                   {/* <IonIcon icon={Power} style={{ fontSize: '2em' }} /> */}
                   <Power style={{ fontSize: '2em' }} />
                   <IonLabel>Panne Courant</IonLabel>
                 </IonButton>
               </IonCol>
-              <IonCol size="3">
-                <IonButton color='light' expand="block" style={buttonStyle('Compteur')} onClick={() => setProblemType('Compteur')}>
+              <IonCol size="6">
+                <IonButton type="button" expand="block" style={buttonStyle('Compteur')} onClick={() => setProblemType('Compteur')} aria-pressed={problemType === 'Compteur'}>
                   <Gauge style={{ fontSize: '2em' }} />
                   <IonLabel>Compteur</IonLabel></IonButton>
               </IonCol>
-              <IonCol size="3">
-                <IonButton color='light' expand="block" style={buttonStyle('cour-circuit')} onClick={() => setProblemType('Cours-circuit')}>
+            </IonRow>
+            <IonRow>
+              <IonCol size="6">
+                <IonButton type="button" expand="block" style={buttonStyle('Cours-circuit')} onClick={() => setProblemType('Cours-circuit')} aria-pressed={problemType === 'Cours-circuit'}>
                   <Zap style={{ fontSize: '2em' }} />
                   <IonLabel>Cours-circuit</IonLabel></IonButton>
               </IonCol>
-              <IonCol size="3">
-                <IonButton color='light' expand="block" style={buttonStyle('Câble Endommagé')} onClick={() => setProblemType('Câble Endommagé')}>
+              <IonCol size="6">
+                <IonButton type="button" expand="block" style={buttonStyle('Câble Endommagé')} onClick={() => setProblemType('Câble Endommagé')} aria-pressed={problemType === 'Câble Endommagé'}>
                   <Cable style={{ fontSize: '2em' }} />
                   <IonLabel>Câble Endommagé</IonLabel></IonButton>
               </IonCol>
-              <IonCol size="3">
-                <IonButton color='light' expand="block" style={buttonStyle('Autre urgence')} onClick={() => setProblemType('Autre urgence')}>
+            </IonRow>
+            <IonRow>
+              <IonCol size="6">
+                <IonButton type="button" expand="block" style={buttonStyle('Autre urgence')} onClick={() => setProblemType('Autre urgence')} aria-pressed={problemType === 'Autre urgence'}>
                   <AlertCircle style={{ fontSize: '2em' }} />
                   <IonLabel>Autre Urgence</IonLabel></IonButton>
               </IonCol>
