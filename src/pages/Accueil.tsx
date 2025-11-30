@@ -11,7 +11,7 @@ const Accueil: React.FC = () => {
   };
 
   const handleAppeler = () => {
-    window.location.href = 'tel:0800123456';
+    window.location.href = 'tel:07433029';
   };
 
   return (
@@ -46,7 +46,7 @@ const Accueil: React.FC = () => {
 
           <div className="ion-text-center" style={{ marginTop: 'auto', paddingBottom: '20px' }}>
             <IonText style={{ color: '#666', fontSize: '1.1em' }}>
-              <p>Numéro d'urgence : <strong>0800 123 456</strong></p>
+              <p>Numéro d'urgence : <strong>07433029</strong></p>
             </IonText>
           </div>
         </div>

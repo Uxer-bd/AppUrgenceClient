@@ -1,11 +1,12 @@
 import { Redirect, Route } from 'react-router-dom';
 import {
-  IonApp,
+  IonApp, IonIcon, IonLabel, IonTabBar, IonTabButton,
   IonRouterOutlet,
   IonTabs,
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
+import { triangle, ellipse, square } from 'ionicons/icons';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -38,7 +39,8 @@ import '@ionic/react/css/palettes/dark.system.css';
 import './theme/variables.css';
 import Accueil from './pages/Accueil';
 import SignaleUrgence from './pages/SignaleUrgence';
-import SuivieUrgence from './pages/SuivieUrgence';
+import SuivieUrgence from './pages/SuivieUrgence2';
+import InterventionListPage from './pages/InterventionsListPage';
 
 setupIonicReact();
 
@@ -53,27 +55,31 @@ const App: React.FC = () => (
           <Route exact path="/signale-urgence">
             <SignaleUrgence />
           </Route>
-          <Route exact path="/suivie-urgence">
+          <Route exact path="/suivie-urgence/:id">
             <SuivieUrgence />
+          </Route>
+          <Route exact path="/liste/urgences">
+            <InterventionListPage />
           </Route>
           <Route exact path="/">
             <Redirect to="/accueil" />
           </Route>
         </IonRouterOutlet>
-        {/* <IonTabBar slot="bottom">
+        <IonTabBar slot="bottom">
           <IonTabButton tab="Accueil" href="/accueil">
             <IonIcon aria-hidden="true" icon={triangle} />
             <IonLabel>Accueil</IonLabel>
           </IonTabButton>
           <IonTabButton tab="SignaleUrgence" href="/signale-urgence">
             <IonIcon aria-hidden="true" icon={ellipse} />
-            <IonLabel>Signal</IonLabel>
+            <IonLabel>signaler une urgence</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab3" href="/tab3">
+          <IonTabButton tab="tab3" href="/liste/urgences">
             <IonIcon aria-hidden="true" icon={square} />
-            <IonLabel>Tab 3</IonLabel>
+            <IonLabel>mes urgences</IonLabel>
           </IonTabButton>
-        </IonTabBar> */}
+        </IonTabBar>
+
       </IonTabs>
     </IonReactRouter>
   </IonApp>

@@ -19,17 +19,28 @@ import {
   timeOutline,
   buildOutline,
   call,
-  text,
 } from 'ionicons/icons';
 import { useLocation } from 'react-router-dom';
 
 // Interface pour décrire la structure des données de l'urgence
+// interface UrgenceData {
+//   telephone: string;
+//   nom: string;
+//   adresse: string;
+//   type: string;
+//   description: string;
+// }
+
+// test avec envoie d'api
 interface UrgenceData {
-  telephone: string;
-  nom: string;
-  adresse: string;
-  type: string;
+  id: number;
+  address: string;
+  title: string;
+  problem_type: string;
   description: string;
+  telephone : string;
+  nom : string;
+  
 }
 
 // On rend `urgenceData` optionnel avec `?` pour que TypeScript ne se plaigne pas
@@ -47,22 +58,25 @@ const SuivieUrgence: React.FC = () => {
   // L'opérateur `||` fournit ensuite un objet par défaut si rien n'a été trouvé.
   const urgenceData = location.state?.urgenceData || {
     telephone: 'Non fourni',
+    title : 'Non fourni',
     nom: 'Non fourni',
-    adresse: 'Non fournie',
+    address: 'Non fournie',
     type: 'Non défini',
     description: 'Non fournie',
+    problem_type: 'Non fournie',
+    id : 'Non fournie',
   };
 
   const statusSteps = [
     { name: 'Réceptionnée', icon: checkmarkCircle, status: 'Terminé', active: true },
     { name: 'Agent Affecté', icon: ellipse, status: 'En cours...', active: true },
-    { name: 'En Route', icon: ellipse, status: '', active: false },
+    { name: 'En Route', icon: ellipse, status: '', active: true },
     { name: 'Arrivé', icon: timeOutline, status: '', active: false },
     { name: 'Terminée', icon: buildOutline, status: '', active: false },
   ];
 
   const handleAppeler = () => {
-    window.location.href = 'tel:0800123456';
+    window.location.href = 'tel:07433029';
   };
 
   return (
@@ -81,19 +95,19 @@ const SuivieUrgence: React.FC = () => {
           <IonCardContent>
             <h2 style={{ fontWeight: 'bold', marginBottom: '15px' }}>Votre demande</h2>
             <p>
-              <strong>Type :</strong> {urgenceData.type}
+              <strong>Type :</strong> {urgenceData.title} - {urgenceData.id}
             </p>
             <p>
               <strong>Description :</strong> {urgenceData.description}
             </p>
             <p>
-              <strong>Téléphone :</strong> {urgenceData.telephone}
+              <strong>Téléphone :</strong> {urgenceData.client.phone}
             </p>
             <p>
-              <strong>Nom :</strong> {urgenceData.nom || 'Non renseigné'}
+              <strong>Nom :</strong> {urgenceData.client.name || 'Non renseigné'}
             </p>
             <p>
-              <strong>Adresse :</strong> {urgenceData.adresse || 'Non renseignée'}
+              <strong>Adresse :</strong> {urgenceData.address || 'Non renseignée'}
             </p>
           </IonCardContent>
         </IonCard>
@@ -170,7 +184,7 @@ const SuivieUrgence: React.FC = () => {
                 marginLeft: '5px',
               }}
             >
-              <IonIcon slot="start" icon={text} />
+              <IonIcon slot="start"/>
               SMS
             </IonButton>
           </div>
