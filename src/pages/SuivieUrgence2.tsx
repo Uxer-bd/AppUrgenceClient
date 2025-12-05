@@ -5,9 +5,9 @@ import {
   IonRefresher, IonRefresherContent, IonBadge
 } from '@ionic/react';
 import {
-  checkmarkCircle, ellipse, timeOutline, buildOutline, call, chatbubbleEllipsesOutline, refreshOutline
+  checkmarkCircle, timeOutline, buildOutline, call, chatbubbleEllipsesOutline, refreshOutline
 } from 'ionicons/icons';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom'; // Ajout de useLocation
 
 // Interface des données API
 interface InterventionData {
@@ -15,54 +15,53 @@ interface InterventionData {
   reference: string;
   description: string;
   address: string;
-  status: 'pending' | 'accepted' | 'in-progress' | 'completed' | 'closed';
+  status: 'pending' | 'accepted' | 'in_progress' | 'completed' | 'closed';
   sub_status?: 'en-route' | 'arrive' | null;
   created_at: string;
   problem_type?: { name: string }; // Si inclus par l'API
   assigned_agent?: { name: string; phone: string; } | null;
 }
 
-// interface LocationState {
-//   urgenceData?: any; // Pour récupérer l'ID initialement
-// }
-
 interface SuiviParams {
   id: string;
 }
 
 const SuivieUrgence: React.FC = () => {
-//   const location = useLocation<LocationState>();
   const history = useHistory();
-  const [present] = useIonToast();
 
-  // On récupère l'ID initialement passé par la création, ou on gère le cas où l'utilisateur revient
-  // Idéalement, cet ID devrait être stocké ou récupéré via une liste "Mes Urgences"
-//   const initialData = location.state?.urgenceData;
-//   const interventionId = initialData?.id;
+  const [present] = useIonToast();
 
   const { id } = useParams<SuiviParams>()
 
   const interventionId = id;
+  const clientPhone = localStorage.getItem('reporter_phone');
 
   const [intervention, setIntervention] = useState<InterventionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // --- Configuration API ---
   // Endpoint public ou client pour suivre une intervention
-  const API_URL = "https://intervention.tekfaso.com/api/interventions"; 
-  // Note: Si l'utilisateur est un client connecté, utilisez son token. 
-  // Sinon (mode invité), l'API doit permettre le GET par ID sans auth ou avec un token temporaire.
-  const TOKEN = localStorage.getItem('access_token'); 
+  const API_URL = "https://intervention.tekfaso.com/api/interventions";
 
   // --- Fonction de chargement des données ---
   const fetchInterventionStatus = useCallback(async () => {
     if (!interventionId) return;
 
-    try {
-        const headers: HeadersInit = { 'Accept': 'application/json' };
-        if (TOKEN) headers['Authorization'] = `Bearer ${TOKEN}`;
+    // VÉRIFICATION MANDATOIRE : Le numéro de téléphone est requis pour l'accès public
+    if (!clientPhone) {
+        present({ message: "Le numéro de téléphone du client est requis pour le suivi.", duration: 4000, color: 'danger' });
+        setIsLoading(false);
+        return;
+    }
 
-        const response = await fetch(`${API_URL}/${interventionId}`, {
+    try {
+        // Simplification des headers: plus besoin de l'Authorization
+        const headers: HeadersInit = { 'Accept': 'application/json' };
+
+        // Construction de l'URL avec les deux paramètres requis (id dans le path, phone en query)
+        const fullUrl = `${API_URL}/${interventionId}?phone=${clientPhone}`;
+
+        const response = await fetch(fullUrl, {
             method: 'GET',
             headers: headers
         });
@@ -78,7 +77,8 @@ const SuivieUrgence: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-  }, [interventionId, TOKEN]);
+  }, [interventionId, clientPhone, present]); // Ajout de clientPhone et present aux dépendances
+
 
   // Chargement initial et Polling (Rafraîchissement automatique toutes les 10s)
   useEffect(() => {
@@ -88,13 +88,20 @@ const SuivieUrgence: React.FC = () => {
         return;
     }
 
-    fetchInterventionStatus();
+    // Le chargement ne se fait que si l'ID et le téléphone sont présents
+    if (interventionId && clientPhone) {
+        fetchInterventionStatus();
+    } else if (!clientPhone && !isLoading) {
+        // Si le téléphone manque, on affiche l'erreur dans fetchInterventionStatus et on arrête le chargement
+        return; 
+    }
+
 
     // Optionnel : Polling pour mise à jour temps réel sans action utilisateur
     const intervalId = setInterval(fetchInterventionStatus, 10000); // Toutes les 10 secondes
 
     return () => clearInterval(intervalId); // Nettoyage à la sortie
-  }, [interventionId, fetchInterventionStatus, history, present]);
+  }, [interventionId, clientPhone, fetchInterventionStatus, history, present, isLoading]);
 
 
   // --- Logique d'affichage du statut (Timeline) ---
@@ -102,7 +109,7 @@ const SuivieUrgence: React.FC = () => {
     if (!intervention) return [];
     
     const status = intervention.status;
-    const subStatus = intervention.sub_status;
+    // const subStatus = intervention.sub_status;
 
     return [
       { 
@@ -113,26 +120,25 @@ const SuivieUrgence: React.FC = () => {
       },
       { 
         name: 'Agent Affecté', 
-        icon: ellipse, 
-        active: ['accepted', 'in-progress', 'completed', 'closed'].includes(status),
-        isCompleted: ['in-progress', 'completed', 'closed'].includes(status)
+        icon: checkmarkCircle, 
+        active: ['accepted', 'in_progress', 'completed', 'closed'].includes(status),
+        isCompleted: ['in_progress', 'completed', 'closed'].includes(status)
       },
       { 
         name: 'En Route', 
-        icon: ellipse, 
-        active: status === 'in-progress' || ['completed', 'closed'].includes(status),
-        // Si sub_status est 'en-route' ou passé (arrive/completed)
-        isCompleted: (status === 'in-progress' && subStatus === 'arrive') || ['completed', 'closed'].includes(status)
+        icon: checkmarkCircle, 
+        active: ['accepted', 'in_progress', 'completed', 'closed'].includes(status),
+        isCompleted: ['in_progress', 'completed', 'closed'].includes(status)
       },
       { 
         name: 'Arrivé', 
         icon: timeOutline, 
-        active: (status === 'in-progress' && subStatus === 'arrive') || ['completed', 'closed'].includes(status),
-        isCompleted: ['completed', 'closed'].includes(status)
+        active: ['accepted', 'in_progress', 'completed', 'closed'].includes(status),
+        isCompleted: ['in_progress', 'completed', 'closed'].includes(status)
       },
       { 
-        name: 'Terminée', 
-        icon: buildOutline, 
+        name: 'Terminée',
+        icon: buildOutline,
         active: ['completed', 'closed'].includes(status),
         isCompleted: ['completed', 'closed'].includes(status)
       },
@@ -155,7 +161,25 @@ const SuivieUrgence: React.FC = () => {
       );
   }
 
-  if (!intervention) return null;
+  if (!intervention && !isLoading) {
+    // Afficher un message si l'intervention n'a pas pu être chargée après tentative
+    return (
+        <IonPage>
+            <IonHeader><IonToolbar><IonTitle>Suivi</IonTitle></IonToolbar></IonHeader>
+            <IonContent className="ion-padding">
+                <IonCard color="danger">
+                    <IonCardContent>
+                        <p>Impossible de charger les détails de l'intervention. Veuillez vérifier l'ID et le numéro de téléphone.</p>
+                        <IonButton expand="full" onClick={() => history.replace('/')}>Retour à l'accueil</IonButton>
+                    </IonCardContent>
+                </IonCard>
+            </IonContent>
+        </IonPage>
+    );
+  }
+  
+  // Si l'intervention n'est pas chargée (ex: clientPhone manquant et !isLoading), on retourne null après l'erreur gérée dans useEffect
+  if (!intervention) return null; 
 
   return (
     <IonPage>
@@ -166,126 +190,131 @@ const SuivieUrgence: React.FC = () => {
           </IonButtons>
           <IonTitle>Suivi #{intervention.reference || intervention.id}</IonTitle>
           <IonButtons slot="end">
-             <IonButton onClick={() => { setIsLoading(true); fetchInterventionStatus(); }}>
-                <IonIcon icon={refreshOutline} />
-             </IonButton>
+            <IonButton onClick={() => { setIsLoading(true); fetchInterventionStatus(); }}>
+              <IonIcon icon={refreshOutline} />
+            </IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent fullscreen className="ion-padding" style={{ '--background': '#f4f5f8' }}>
+      <IonContent fullscreen className="ion-padding" style={{ '--background': '#f4f5f8', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
             <IonRefresherContent />
         </IonRefresher>
-
-        {/* Card: Votre demande */}
-        <IonCard style={{ borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-          <IonCardContent>
-            <h2 style={{ fontWeight: 'bold', marginBottom: '15px' }}>Votre demande</h2>
-            {/* Afficher les données réelles */}
-            {/* <p><strong>Type :</strong> {intervention.problem_type?.name || 'Urgence'}</p> */}
-            <p><strong>Description :</strong> {intervention.description}</p>
-            <p><strong>Adresse :</strong> {intervention.address}</p>
-            <IonBadge color={intervention.status === 'pending' ? 'warning' : 'success'} style={{marginTop: '10px'}}>
-                {intervention.status === 'pending' ? 'En attente d\'attribution' : 'Prise en charge'}
-            </IonBadge>
-          </IonCardContent>
-        </IonCard>
-
-        {/* Card: Statut de l'intervention (Timeline Dynamique) */}
-        <IonCard style={{ borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-          <IonCardContent>
-            <h2 style={{ fontWeight: 'bold', marginBottom: '20px' }}>Statut de l'intervention</h2>
-            
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '15px',
-                  // Opacité réduite pour les étapes futures
-                  opacity: step.active ? 1 : 0.3, 
-                  transition: 'opacity 0.5s ease'
-                }}
-              >
-                <div style={{ position: 'relative', marginRight: '15px' }}>
-                    {/* Ligne verticale */}
-                    {index < steps.length - 1 && (
-                        <div style={{
-                            position: 'absolute', left: '50%', top: '20px', bottom: '-20px', width: '2px',
-                            backgroundColor: steps[index+1].active ? '#2dd36f' : '#ddd',
-                            transform: 'translateX(-50%)', zIndex: 0
-                        }} />
-                    )}
-                    <IonIcon
-                    icon={step.icon}
-                    style={{
-                        color: step.active ? (step.isCompleted ? '#2dd36f' : '#3880ff') : '#ccc',
-                        fontSize: '2em',
-                        backgroundColor: '#fff',
-                        zIndex: 1,
-                        position: 'relative'
-                    }}
-                    />
-                </div>
-                <div>
-                  <IonLabel style={{ fontWeight: 'bold', fontSize: '1.1em', color: step.active ? '#000' : '#888' }}>
-                    {step.name}
-                  </IonLabel>
-                  {/* Afficher "En cours" uniquement sur l'étape active la plus avancée */}
-                  {index === currentStepIndex && intervention.status !== 'completed' && intervention.status !== 'closed' && (
-                      <p style={{ color: '#3880ff', margin: 0, fontSize: '0.9em', fontStyle: 'italic' }}>En cours...</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </IonCardContent>
-        </IonCard>
-
-        {/* Card: Technicien assigné (Affiché uniquement si assigné) */}
-        {intervention.assigned_agent && (
-            <IonCard style={{ borderRadius: '15px', '--background': '#eef5ff', boxShadow: 'none' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+          {/* Card: Votre demande */}
+          <IonCard style={{ borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', width : '85%' }}>
             <IonCardContent>
-                <h3 style={{ fontWeight: 'bold' }}>Technicien assigné</h3>
-                <p style={{ fontSize: '1.2em' }}>{intervention.assigned_agent.name}</p>
-                
-                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                    <IonButton 
-                        fill="solid" 
-                        color="success" 
-                        size="small" 
-                        href={`tel:${intervention.assigned_agent.phone}`}
-                    >
-                        <IonIcon icon={call} slot="start" /> Appeler
-                    </IonButton>
-                </div>
+              <h2 style={{ fontWeight: 'bold', marginBottom: '15px' }}>Votre demande</h2>
+              {/* Afficher les données réelles */}
+              {/* <p><strong>Type :</strong> {intervention.problem_type?.name || 'Urgence'}</p> */}
+              <p><strong>Description :</strong> {intervention.description}</p>
+              <p><strong>Adresse :</strong> {intervention.address}</p>
+              <IonBadge color={intervention.status === 'pending' ? 'warning' : 'success'} style={{marginTop: '10px'}}>
+                {intervention.status === 'pending' ? 'En attente d\'attribution' : 'Prise en charge'}
+              </IonBadge>
             </IonCardContent>
-            </IonCard>
-        )}
+          </IonCard>
+        
+        
 
-        {/* Section: Aide immédiate */}
-        <div style={{ marginTop: '20px', border: '1px solid #ff4961', borderRadius: '15px', padding: '15px', textAlign: 'center' }}>
-          <p style={{ fontWeight: 'bold', marginBottom: '10px', color: '#ff4961' }}>
-            Besoin d'aide immédiate ?
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-            <IonButton
-              color="danger"
-              style={{ flex: 1, marginRight: '5px' }}
-              href="tel:0800123456" // Numéro du standard général
-            >
-              <IonIcon slot="start" icon={call} />
-              Standard
-            </IonButton>
-            <IonButton
-              fill="outline"
-              color="danger"
-              style={{ flex: 1, marginLeft: '5px' }}
-            >
-              <IonIcon slot="start" icon={chatbubbleEllipsesOutline} />
-              Support
-            </IonButton>
+          {/* Card: Statut de l'intervention (Timeline Dynamique) */}
+          <IonCard style={{ borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', width : '85%' }}>
+            <IonCardContent>
+              <h2 style={{ fontWeight: 'bold', marginBottom: '20px' }}>Statut de l'intervention</h2>
+              
+              {steps.map((step, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '15px',
+                    // Opacité réduite pour les étapes futures
+                    opacity: step.active ? 1 : 0.3, 
+                    transition: 'opacity 0.5s ease'
+                  }}
+                >
+                  <div style={{ position: 'relative', marginRight: '15px' }}>
+                      {/* Ligne verticale */}
+                      {index < steps.length - 1 && (
+                          <div style={{
+                              position: 'absolute', left: '50%', top: '20px', bottom: '-20px', width: '2px',
+                              backgroundColor: steps[index+1].active ? '#2dd36f' : '#ddd',
+                              transform: 'translateX(-50%)', zIndex: 0
+                          }} />
+                      )}
+                      <IonIcon
+                      icon={step.icon}
+                      style={{
+                          color: step.active ? (step.isCompleted ? '#2dd36f' : '#3880ff') : '#ccc',
+                          fontSize: '2em',
+                          backgroundColor: '#fff',
+                          zIndex: 1,
+                          position: 'relative'
+                      }}
+                      />
+                  </div>
+                  <div>
+                    <IonLabel style={{ fontWeight: 'bold', fontSize: '1.1em', color: step.active ? '#000' : '#888' }}>
+                      {step.name}
+                    </IonLabel>
+                    {/* Afficher "En cours" uniquement sur l'étape active la plus avancée */}
+                    {index === currentStepIndex && intervention.status !== 'completed' && intervention.status !== 'closed' && (
+                        <p style={{ color: '#3880ff', margin: 0, fontSize: '0.9em', fontStyle: 'italic' }}>En cours...</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </IonCardContent>
+          </IonCard>
+        
+
+          {/* Card: Technicien assigné (Affiché uniquement si assigné) */}
+          {intervention.assigned_agent && (
+            <IonCard style={{ borderRadius: '15px', '--background': '#eef5ff', boxShadow: 'none', width : '85%' }}>
+              <IonCardContent>
+                  <h3 style={{ fontWeight: 'bold' }}>Technicien assigné</h3>
+                  <p style={{ fontSize: '1.2em' }}>{intervention.assigned_agent.name}</p>
+
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                      <IonButton
+                          fill="solid"
+                          color="success"
+                          size="small"
+                          href={`tel:${intervention.assigned_agent.phone}`}
+                      >
+                          <IonIcon icon={call} slot="start" /> Appeler
+                      </IonButton>
+                  </div>
+              </IonCardContent>
+            </IonCard>
+          )}
+
+
+          {/* Section: Aide immédiate */}
+          <div style={{ marginTop: '20px', width:'85%', border: '1px solid #ff4961', borderRadius: '15px', padding: '15px', textAlign: 'center' }}>
+            <p style={{ fontWeight: 'bold', marginBottom: '10px', color: '#ff4961' }}>
+              Besoin d'aide immédiate ?
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+              <IonButton
+                color="danger"
+                style={{ flex: 1, marginRight: '5px' }}
+                href="tel:0800123456" // Numéro du standard général
+              >
+                <IonIcon slot="start" icon={call} />
+                Appeler
+              </IonButton>
+              <IonButton
+                fill="outline"
+                color="danger"
+                style={{ flex: 1, marginLeft: '5px' }}
+              >
+                <IonIcon slot="start" icon={chatbubbleEllipsesOutline} />
+                message
+              </IonButton>
+            </div>
           </div>
         </div>
       </IonContent>

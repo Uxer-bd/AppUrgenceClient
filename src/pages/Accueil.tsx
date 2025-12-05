@@ -16,8 +16,8 @@ const Accueil: React.FC = () => {
 
   return (
     <IonPage>
-      <IonContent fullscreen className="ion-padding" style={{ '--background': '#f4f5f8' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
+      <IonContent fullscreen className="ion-padding" style={{ '--background': '#f4f5f8', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', alignItems: 'center' }}>
           <div className="ion-text-center" style={{ marginBottom: '50px' }}>
             <h1 style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>Service d'Urgence Électrique</h1>
             <p style={{ fontSize: '1.2em', color: '#666' }}>Assistance 24h/24 - 7j/7</p>
@@ -26,7 +26,7 @@ const Accueil: React.FC = () => {
           <IonButton
             expand="block"
             size="large"
-            style={{ '--background': '#ffc409', '--color': '#000', '--border-radius': '15px', height: '70px', textTransform: 'none', fontSize: '1.4em', fontWeight: 'bold' }}
+            style={{ '--background': '#ffc409', '--color': '#000', '--border-radius': '15px', height: '100px', width:'70%', textTransform: 'none', fontSize: '1.4em', fontWeight: 'bold' }}
             onClick={handleSignaler}
           >
             <IonIcon icon={warningOutline} slot="start" />
@@ -37,7 +37,7 @@ const Accueil: React.FC = () => {
             expand="block"
             size="large"
             className="ion-margin-top"
-            style={{ '--background': '#3880ff', '--color': '#fff', '--border-radius': '15px', height: '70px', textTransform: 'none', fontSize: '1.4em', fontWeight: 'bold' }}
+            style={{ '--background': '#3880ff', '--color': '#fff', '--border-radius': '15px', height: '100px', width:'70%', textTransform: 'none', fontSize: '1.4em', fontWeight: 'bold' }}
             onClick={handleAppeler}
           >
             <IonIcon icon={callOutline} slot="start" />

@@ -19,8 +19,8 @@ interface Intervention {
     address: string;
     status: 'pending' | 'accepted' | 'in-progress' | 'completed' | 'closed' | string;
     created_at: string;
-    // Informations optionnelles, si fournies par l'API
     client_name?: string; 
+    client_phone?: string; // Assurez-vous que l'API renvoie le numéro client
     assigned_agent?: { name: string } | null;
 }
 
@@ -30,15 +30,18 @@ const InterventionListPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [filterStatus, setFilterStatus] = useState<string>('all'); // Filtre actif
+    const [filterStatus, setFilterStatus] = useState<string>('all');
     const [present] = useIonToast();
 
+    // Récupération des données locales (pour le mode client non authentifié)
+    const localReporterName = localStorage.getItem('reporter_name');
+    const localReporterPhone = localStorage.getItem('reporter_phone');
+    
     // --- Configuration API ---
-    // Endpoint pour lister les interventions (GET /interventions)
-    const API_URL = "https://intervention.tekfaso.com/api/interventions"; 
+    const API_URL_BASE = "https://intervention.tekfaso.com/api/interventions"; 
     const TOKEN = localStorage.getItem('access_token'); 
 
-    // --- Utilitaires de Statut ---
+    // --- Utilitaires de Statut (inchangé) ---
     const getStatusStyle = (status: string) => {
         switch (status.toLowerCase()) {
             case 'pending':
@@ -54,11 +57,28 @@ const InterventionListPage: React.FC = () => {
         }
     };
 
-    // --- Fonction de chargement des interventions ---
+    // --- Fonction de chargement des interventions (MODIFIÉE) ---
     const fetchInterventions = useCallback(async (refresh = false) => {
-        if (!TOKEN) {
-            setError("Erreur d'authentification. Session expirée.");
-            history.replace('/login');
+        
+        let targetUrl = API_URL_BASE;
+        const headers: HeadersInit = {
+            'Accept': 'application/json'
+        };
+        let isPublicMode = false;
+
+        // Déterminer le mode d'accès (Token ou Public par téléphone)
+        if (TOKEN) {
+            // MODE AUTHENTIFIÉ (Manager/Agent) : Utilise le Token
+            headers['Authorization'] = `Bearer ${TOKEN}`;
+        } else if (localReporterPhone) {
+            // MODE PUBLIC (Client) : Utilise le numéro de téléphone local
+            targetUrl = `${API_URL_BASE}?phone=${localReporterPhone}`;
+            isPublicMode = true;
+        } else {
+            // Aucun moyen de s'authentifier ou de filtrer
+            setError("Impossible de charger les interventions. Données d'accès manquantes.");
+            // On pourrait rediriger vers la page d'accueil ou de connexion si aucune donnée n'est trouvée
+            // history.replace('/login'); 
             return;
         }
 
@@ -66,23 +86,24 @@ const InterventionListPage: React.FC = () => {
         setError(null);
 
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(targetUrl, {
                 method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`,
-                    'Accept': 'application/json'
-                },
+                headers: headers,
             });
 
-            if (response.status === 401) throw new Error('Session expirée.');
+            if (response.status === 401 && !isPublicMode) throw new Error('Session expirée.');
             if (!response.ok) {
-                throw new Error(`Échec du chargement: ${response.status}`);
+                // Gestion d'erreur spécifique au mode public/token
+                const errorDetail = await response.json();
+                throw new Error(`Échec du chargement: ${response.status}. ${errorDetail.message || ''}`);
             }
 
             const result = await response.json();
             
             // On suppose que les données sont directement sous 'data' ou 'interventions'
+            // L'image API montrait un tableau 'data' directement.
             const list = result.data?.interventions || result.data || result;
+            
             if (Array.isArray(list)) {
                 setInterventions(list as Intervention[]);
             } else {
@@ -97,7 +118,7 @@ const InterventionListPage: React.FC = () => {
         } finally {
             if (!refresh) setLoading(false); else setIsRefreshing(false);
         }
-    }, [TOKEN, present, history]);
+    }, [TOKEN, localReporterPhone, present]); // Dépendances mises à jour
 
     useEffect(() => {
         fetchInterventions();
@@ -107,7 +128,7 @@ const InterventionListPage: React.FC = () => {
         fetchInterventions(true).then(() => event.detail.complete());
     };
 
-    // --- Filtrage des interventions ---
+    // --- Filtrage des interventions (inchangé) ---
     const filteredInterventions = interventions.filter(inter => {
         if (filterStatus === 'all') return true;
         if (filterStatus === 'active') {
@@ -117,6 +138,8 @@ const InterventionListPage: React.FC = () => {
     });
 
     /* --- Rendu --- */
+    // Le rendu reste le même que la version précédente, car la logique de chargement
+    // et d'affichage est gérée par les hooks et la fonction fetchInterventions.
 
     if (loading) {
         return (
@@ -129,7 +152,7 @@ const InterventionListPage: React.FC = () => {
             </IonPage>
         );
     }
-    
+
     return (
         <IonPage>
             <IonHeader>
@@ -173,22 +196,47 @@ const InterventionListPage: React.FC = () => {
                     </div>
                 )}
 
-                {!error && interventions.length === 0 ? (
+                {!error && filteredInterventions.length === 0 ? (
                     <div className="ion-padding ion-text-center">
-                        <IonText color="medium"><p>Aucune intervention dans le système.</p></IonText>
-                        {/* Optionnel: Bouton pour créer une intervention si l'admin peut le faire */}
+                        <IonText color="medium">
+                            <p>
+                                {/* Message adapté au mode public/privé */}
+                                {localReporterPhone && !TOKEN 
+                                    ? `Aucune intervention trouvée pour le numéro ${localReporterPhone}.`
+                                    : "Aucune intervention dans le système."
+                                }
+                            </p>
+                        </IonText>
                     </div>
                 ) : (
                     <IonList>
                         {filteredInterventions.map((inter) => {
                             const status = getStatusStyle(inter.status);
                             
+                            // Déterminer le nom du demandeur (logique précédente conservée et améliorée)
+                            let requesterDisplay = 'Inconnu';
+                            
+                            // 1. Priorité aux données API (si elles existent)
+                            if (inter.client_name) {
+                                requesterDisplay = inter.client_name;
+                            } 
+                            // 2. Sinon, utiliser le nom stocké localement si le numéro correspond
+                            else if (localReporterPhone && (inter.client_phone === localReporterPhone || !inter.client_phone)) {
+                                // Si l'intervention n'a pas de client_phone dans la réponse, on suppose que c'est celle de l'utilisateur actuel si on est en mode public.
+                                requesterDisplay = localReporterName || 'Moi (Local)';
+                            } 
+                            // 3. Fallback (Si l'API fournit le numéro, mais pas le nom)
+                            else if (inter.client_phone) {
+                                requesterDisplay = inter.client_phone;
+                            }
+                            
                             return (
                                 <IonItem 
                                     key={inter.id} 
                                     detail={true} 
-                                    // Lien vers la page de détail pour Manager
-                                    routerLink={`/suivie-urgence/${inter.id}`} 
+                                    // Lien vers la page de détail pour Manager ou Client
+                                    // Le numéro de téléphone est ajouté au lien pour le suivi public.
+                                    routerLink={`/suivie-urgence/${inter.id}?phone=${inter.client_phone || localReporterPhone}`} 
                                     lines="full"
                                 >
                                     <IonIcon icon={locateOutline} slot="start" color="medium" />
@@ -196,7 +244,7 @@ const InterventionListPage: React.FC = () => {
                                         <h2>{inter.reference || `#${inter.id}`} - {inter.address}</h2>
                                         <p>{inter.description.substring(0, 50)}...</p>
                                         <IonNote color="medium">
-                                            Demandeur: {inter.client_name || 'Invité'}
+                                            Demandeur: {requesterDisplay}
                                             {inter.assigned_agent && ` | Assigné à: ${inter.assigned_agent.name}`}
                                         </IonNote>
                                     </IonLabel>
