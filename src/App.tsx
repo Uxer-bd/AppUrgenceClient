@@ -6,7 +6,7 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { triangle, ellipse, square } from 'ionicons/icons';
+import { home, radio, list } from 'ionicons/icons';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -67,15 +67,15 @@ const App: React.FC = () => (
         </IonRouterOutlet>
         <IonTabBar slot="bottom">
           <IonTabButton tab="Accueil" href="/accueil">
-            <IonIcon aria-hidden="true" icon={triangle} />
+            <IonIcon aria-hidden="true" icon={home} />
             <IonLabel>Accueil</IonLabel>
           </IonTabButton>
           <IonTabButton tab="SignaleUrgence" href="/signale-urgence">
-            <IonIcon aria-hidden="true" icon={ellipse} />
+            <IonIcon aria-hidden="true" icon={radio} />
             <IonLabel>signaler une urgence</IonLabel>
           </IonTabButton>
           <IonTabButton tab="tab3" href="/liste/urgences">
-            <IonIcon aria-hidden="true" icon={square} />
+            <IonIcon aria-hidden="true" icon={list} />
             <IonLabel>mes urgences</IonLabel>
           </IonTabButton>
         </IonTabBar>
