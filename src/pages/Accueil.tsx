@@ -1,7 +1,8 @@
 import React from 'react';
-import { IonContent, IonPage, IonButton, IonIcon, IonText } from '@ionic/react';
+import { IonContent, IonPage, IonButton, IonIcon, IonText, IonHeader, IonToolbar, IonTitle } from '@ionic/react';
 import { warningOutline, callOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
+// import { AlignCenter } from 'lucide-react';
 
 const Accueil: React.FC = () => {
   const history = useHistory();
@@ -16,7 +17,12 @@ const Accueil: React.FC = () => {
 
   return (
     <IonPage>
-      <IonContent fullscreen className="ion-padding" style={{ '--background': '#f4f5f8', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <IonHeader>
+          <IonToolbar color="primary">
+              <IonTitle>Accueil</IonTitle>
+          </IonToolbar>
+      </IonHeader>
+      <IonContent fullscreen className="ion-padding" style={{ '--background': '#f4f5f8', display: 'flex', flexDirection: 'column', justifyContent: 'center', AlignCenter: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', alignItems: 'center' }}>
           <div className="ion-text-center" style={{ marginBottom: '50px' }}>
             <h1 style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>Service d'Urgence Électrique</h1>
@@ -44,7 +50,7 @@ const Accueil: React.FC = () => {
             Appeler maintenant
           </IonButton>
 
-          <div className="ion-text-center" style={{ marginTop: 'auto', paddingBottom: '20px' }}>
+          <div className="ion-text-center" style={{ marginTop: '30px', paddingBottom: '20px' }}>
             <IonText style={{ color: '#666', fontSize: '1.1em' }}>
               <p>Numéro d'urgence : <strong>07433029</strong></p>
             </IonText>

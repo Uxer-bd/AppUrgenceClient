@@ -30,7 +30,7 @@ const InterventionListPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [filterStatus, setFilterStatus] = useState<string>('all');
+    const [filterStatus, setFilterStatus] = useState<'pending' | 'active' | 'completed'>('pending');
     const [present] = useIonToast();
 
     // Récupération des données locales (pour le mode client non authentifié)
@@ -39,7 +39,18 @@ const InterventionListPage: React.FC = () => {
     
     // --- Configuration API ---
     const API_URL_BASE = "https://intervention.tekfaso.com/api/interventions"; 
-    const TOKEN = localStorage.getItem('access_token'); 
+    const TOKEN = localStorage.getItem('access_token');
+
+    // Compte des catégories pour le filtrage 
+    const countPending = interventions.filter(i => i.status === 'pending').length;
+
+    const countActive = interventions.filter(i =>
+        i.status === 'accepted' || i.status === 'in-progress'
+    ).length;
+
+    const countCompleted = interventions.filter(i =>
+        i.status === 'completed' || i.status === 'closed'
+    ).length;
 
     // --- Utilitaires de Statut (inchangé) ---
     const getStatusStyle = (status: string) => {
@@ -130,11 +141,17 @@ const InterventionListPage: React.FC = () => {
 
     // --- Filtrage des interventions (inchangé) ---
     const filteredInterventions = interventions.filter(inter => {
-        if (filterStatus === 'all') return true;
+        if (filterStatus === 'pending') return inter.status === 'pending';
+
         if (filterStatus === 'active') {
             return inter.status === 'accepted' || inter.status === 'in-progress';
         }
-        return inter.status === filterStatus;
+
+        if (filterStatus === 'completed') {
+            return inter.status === 'completed' || inter.status === 'closed';
+        }
+
+        return false;
     });
 
     /* --- Rendu --- */
@@ -176,17 +193,27 @@ const InterventionListPage: React.FC = () => {
                 </IonRefresher>
 
                 {/* Barre de Filtrage */}
-                <IonSegment 
-                    value={filterStatus} 
-                    onIonChange={e => setFilterStatus(e.detail.value!)} 
+                <IonSegment
+                    value={filterStatus}
+                    onIonChange={e => setFilterStatus(e.detail.value as 'pending' | 'active' | 'completed')}
                     color="primary"
                     scrollable={true}
                     className="ion-padding-horizontal ion-margin-bottom"
                 >
-                    <IonSegmentButton value="all"><IonLabel>Tout ({interventions.length})</IonLabel></IonSegmentButton>
-                    <IonSegmentButton value="pending"><IonLabel>Attente</IonLabel></IonSegmentButton>
-                    <IonSegmentButton value="active"><IonLabel>En Cours</IonLabel></IonSegmentButton>
-                    <IonSegmentButton value="completed"><IonLabel>Terminée</IonLabel></IonSegmentButton>
+                    <IonSegmentButton value="pending">
+                        <IonLabel>En attente</IonLabel>
+                        {countPending > 0 && <IonBadge color="danger">{countPending}</IonBadge>}
+                    </IonSegmentButton>
+
+                    <IonSegmentButton value="active">
+                        <IonLabel>En cours</IonLabel>
+                        {countActive > 0 && <IonBadge color="warning">{countActive}</IonBadge>}
+                    </IonSegmentButton>
+
+                    <IonSegmentButton value="completed">
+                        <IonLabel>Terminée</IonLabel>
+                        {countCompleted > 0 && <IonBadge color="success">{countCompleted}</IonBadge>}
+                    </IonSegmentButton>
                 </IonSegment>
 
                 {error && (
@@ -219,7 +246,7 @@ const InterventionListPage: React.FC = () => {
                             // 1. Priorité aux données API (si elles existent)
                             if (inter.client_name) {
                                 requesterDisplay = inter.client_name;
-                            } 
+                            }
                             // 2. Sinon, utiliser le nom stocké localement si le numéro correspond
                             else if (localReporterPhone && (inter.client_phone === localReporterPhone || !inter.client_phone)) {
                                 // Si l'intervention n'a pas de client_phone dans la réponse, on suppose que c'est celle de l'utilisateur actuel si on est en mode public.
@@ -229,6 +256,10 @@ const InterventionListPage: React.FC = () => {
                             else if (inter.client_phone) {
                                 requesterDisplay = inter.client_phone;
                             }
+                            const phoneToSend =
+                            inter.client_phone && inter.client_phone.trim() !== ""
+                                ? inter.client_phone
+                                : localReporterPhone;
                             
                             return (
                                 <IonItem 
@@ -236,7 +267,7 @@ const InterventionListPage: React.FC = () => {
                                     detail={true} 
                                     // Lien vers la page de détail pour Manager ou Client
                                     // Le numéro de téléphone est ajouté au lien pour le suivi public.
-                                    routerLink={`/suivie-urgence/${inter.id}?phone=${inter.client_phone || localReporterPhone}`} 
+                                    routerLink={`/suivie-urgence/${inter.id}/${phoneToSend}`} 
                                     lines="full"
                                 >
                                     <IonIcon icon={locateOutline} slot="start" color="medium" />

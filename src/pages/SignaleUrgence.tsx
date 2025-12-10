@@ -113,7 +113,7 @@ const SignalerUrgence: React.FC = () => {
             });
 
             // REDIRECTION : Vers la nouvelle route de suivi
-            history.push(`/suivie-urgence/${newInterventionId}`); 
+            history.push(`/suivie-urgence/${newInterventionId}/${telephone}`); 
 
         } catch (error: unknown) {
             present({

@@ -24,6 +24,7 @@ interface InterventionData {
 
 interface SuiviParams {
   id: string;
+  phone : string;
 }
 
 const SuivieUrgence: React.FC = () => {
@@ -31,10 +32,14 @@ const SuivieUrgence: React.FC = () => {
 
   const [present] = useIonToast();
 
-  const { id } = useParams<SuiviParams>()
+  const { id, phone } = useParams<SuiviParams>()
 
   const interventionId = id;
-  const clientPhone = localStorage.getItem('reporter_phone');
+  const tel = phone;
+
+  // const clientPhone = localStorage.getItem('reporter_phone');
+
+  const clientPhone = phone;
 
   const [intervention, setIntervention] = useState<InterventionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,7 +170,7 @@ const SuivieUrgence: React.FC = () => {
     // Afficher un message si l'intervention n'a pas pu être chargée après tentative
     return (
         <IonPage>
-            <IonHeader><IonToolbar><IonTitle>Suivi</IonTitle></IonToolbar></IonHeader>
+            <IonHeader><IonToolbar><IonTitle>Suivi de {tel}</IonTitle></IonToolbar></IonHeader>
             <IonContent className="ion-padding">
                 <IonCard color="danger">
                     <IonCardContent>
@@ -188,7 +193,7 @@ const SuivieUrgence: React.FC = () => {
           <IonButtons slot="start">
             <IonBackButton defaultHref="/" />
           </IonButtons>
-          <IonTitle>Suivi #{intervention.reference || intervention.id}</IonTitle>
+          <IonTitle>Suivi #{intervention.reference || intervention.id} - {tel}</IonTitle>
           <IonButtons slot="end">
             <IonButton onClick={() => { setIsLoading(true); fetchInterventionStatus(); }}>
               <IonIcon icon={refreshOutline} />
@@ -215,14 +220,12 @@ const SuivieUrgence: React.FC = () => {
               </IonBadge>
             </IonCardContent>
           </IonCard>
-        
-        
 
           {/* Card: Statut de l'intervention (Timeline Dynamique) */}
           <IonCard style={{ borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', width : '85%' }}>
             <IonCardContent>
               <h2 style={{ fontWeight: 'bold', marginBottom: '20px' }}>Statut de l'intervention</h2>
-              
+
               {steps.map((step, index) => (
                 <div
                   key={index}
@@ -231,7 +234,7 @@ const SuivieUrgence: React.FC = () => {
                     alignItems: 'center',
                     marginBottom: '15px',
                     // Opacité réduite pour les étapes futures
-                    opacity: step.active ? 1 : 0.3, 
+                    opacity: step.active ? 1 : 0.3,
                     transition: 'opacity 0.5s ease'
                   }}
                 >
