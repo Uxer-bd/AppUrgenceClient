@@ -13,7 +13,7 @@ const LoginPage: React.FC = () => {
   const handleLogin = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('https://intervention.tekfaso.com/api/auth/login', {
+      const response = await fetch('https://api.depannel.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

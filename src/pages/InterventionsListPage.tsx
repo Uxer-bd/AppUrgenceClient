@@ -38,7 +38,7 @@ const InterventionListPage: React.FC = () => {
     const localReporterPhone = localStorage.getItem('reporter_phone');
     
     // --- Configuration API ---
-    const API_URL_BASE = "https://intervention.tekfaso.com/api/interventions"; 
+    const API_URL_BASE = "https://api.depannel.com/api/interventions"; 
     const TOKEN = localStorage.getItem('access_token');
 
     // Compte des catégories pour le filtrage 

@@ -12,7 +12,7 @@ const Accueil: React.FC = () => {
   };
 
   const handleAppeler = () => {
-    window.location.href = 'tel:07433029';
+    window.location.href = 'tel:74213460';
   };
 
   return (
