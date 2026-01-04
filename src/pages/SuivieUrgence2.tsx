@@ -5,7 +5,7 @@ import {
   IonRefresher, IonRefresherContent, IonBadge
 } from '@ionic/react';
 import {
-  checkmarkCircle, timeOutline, buildOutline, call, chatbubbleEllipsesOutline, refreshOutline, star, starOutline
+  checkmarkCircle, timeOutline, buildOutline, call, chatbubbleEllipsesOutline, star, starOutline
 } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom'; // Ajout de useLocation
 
@@ -101,7 +101,7 @@ const SuivieUrgence: React.FC = () => {
         `https://api.depannel.com/api/quotes/${quoteId}/${action}`,
         {
           method: 'POST',
-          headers: { 
+          headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
@@ -127,40 +127,25 @@ const SuivieUrgence: React.FC = () => {
 // Appelez cette fonction dans votre useEffect de chargement initial
 
   // --- Fonction de chargement des données ---
-  const fetchInterventionStatus = useCallback(async () => {
-    if (!interventionId) return;
+  const fetchInterventionStatus = useCallback(async (isSilent = true) => {
+    if (!interventionId || !clientPhone) return;
 
-    // VÉRIFICATION MANDATOIRE : Le numéro de téléphone est requis pour l'accès public
-    if (!clientPhone) {
-        present({ message: "Le numéro de téléphone du client est requis pour le suivi.", duration: 4000, color: 'danger' });
-        setIsLoading(false);
-        return;
-    }
+    if (!isSilent) setIsLoading(true); // On ne montre le loader que si demandé explicitement
 
     try {
-        // Simplification des headers: plus besoin de l'Authorization
-        const headers: HeadersInit = { 'Accept': 'application/json' };
-
-        // Construction de l'URL avec les deux paramètres requis (id dans le path, phone en query)
-        const fullUrl = `${API_URL}/${interventionId}?phone=${clientPhone}`;
-
-        const response = await fetch(fullUrl, {
-            method: 'GET',
-            headers: headers
-        });
-
-        if (!response.ok) throw new Error("Impossible de mettre à jour le statut.");
-
+      const fullUrl = `${API_URL}/${interventionId}?phone=${clientPhone}`;
+      const response = await fetch(fullUrl, { headers: { 'Accept': 'application/json' } });
+      if (response.ok) {
         const json = await response.json();
         const data = json.intervention || json.data || json;
         setIntervention(data);
-
+      }
     } catch (error) {
-        console.error("Erreur de suivi:", error);
+      console.error("Erreur de mise à jour:", error);
     } finally {
-        setIsLoading(false);
+      if (!isSilent) setIsLoading(false);
     }
-    }, [interventionId, clientPhone, present]); // Ajout de clientPhone et present aux dépendances
+  }, [interventionId, clientPhone]); // Ajout de clientPhone et present aux dépendances
 
     // --- Fonction de soumission de l'avis ---
     const submitRating = async () => {
@@ -200,33 +185,25 @@ const SuivieUrgence: React.FC = () => {
 
   // Chargement initial et Polling (Rafraîchissement automatique toutes les 10s)
   useEffect(() => {
-    if (!interventionId) {
-        present({ message: "Aucune intervention à suivre.", duration: 3000, color: 'warning' });
-        history.replace('/'); // Retour accueil si pas d'ID
-        return;
-    }
+  if (!interventionId || !clientPhone) return;
 
-    // Le chargement ne se fait que si l'ID et le téléphone sont présents
-    if (interventionId && clientPhone) {
-        fetchInterventionStatus();
-    } else if (!clientPhone && !isLoading) {
-        // Si le téléphone manque, on affiche l'erreur dans fetchInterventionStatus et on arrête le chargement
-        return;
-    }
+  // 1. Chargement initial avec loader
+  setIsLoading(true);
+  Promise.all([fetchInterventionStatus(), fetchQuotes()]).finally(() => {
+    setIsLoading(false);
+  });
 
-
-    // Optionnel : Polling pour mise à jour temps réel sans action utilisateur
-    const intervalId = setInterval(fetchInterventionStatus, 10000); // Toutes les 10 secondes
-
-    return () => clearInterval(intervalId); // Nettoyage à la sortie
-  }, [interventionId, clientPhone, fetchInterventionStatus, history, present, isLoading]);
-
-    useEffect(() => {
-    if (interventionId && clientPhone) {
+  // 2. Mise en place du rafraîchissement automatique (Polling)
+  const intervalId = setInterval(() => {
+    // On ne rafraîchit que si l'intervention n'est pas finalisée
+    if (intervention?.status !== 'closed' && intervention?.status !== 'completed') {
       fetchInterventionStatus();
       fetchQuotes();
     }
-  }, [interventionId, clientPhone, fetchInterventionStatus, fetchQuotes]);
+  }, 10000); // 10 secondes
+
+  return () => clearInterval(intervalId); // Nettoyage
+}, [interventionId, clientPhone, fetchInterventionStatus, fetchQuotes, intervention?.status]);
 
   useEffect(() => {
       // Si l'intervention est terminée et que le client n'a pas encore noté
@@ -264,7 +241,7 @@ const SuivieUrgence: React.FC = () => {
       { 
         name: 'En intervention',
         icon: timeOutline, 
-        active: ['accepted', 'in_progress', 'completed', 'closed'].includes(status),
+        active: ['in_progress', 'completed', 'closed'].includes(status),
         isCompleted: ['in_progress', 'completed', 'closed'].includes(status)
       },
       { 
@@ -320,11 +297,12 @@ const SuivieUrgence: React.FC = () => {
             <IonBackButton defaultHref="/" />
           </IonButtons>
           <IonTitle>Suivi intervention #{intervention.id}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={() => { setIsLoading(true); fetchInterventionStatus(); }}>
-              <IonIcon icon={refreshOutline} />
-            </IonButton>
-          </IonButtons>
+          {/* <IonButton onClick={() => {
+            fetchInterventionStatus(false);
+            fetchQuotes();
+          }}>
+            <IonIcon icon={refreshOutline} className={isLoading ? 'animate-spin' : ''} />
+          </IonButton> */}
         </IonToolbar>
       </IonHeader>
 
