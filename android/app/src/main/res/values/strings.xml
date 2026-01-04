@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">depannel</string>
-    <string name="title_activity_main">depannel</string>
+    <string name="app_name">Depannel</string>
+    <string name="title_activity_main">Depannel</string>
     <string name="package_name">io.ionic.starter</string>
     <string name="custom_url_scheme">io.ionic.starter</string>
 </resources>
