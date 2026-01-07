@@ -45,8 +45,8 @@ const SignalerUrgence: React.FC = () => {
             case 'Électroménager': return 6;
             case 'Solaire': return 7;
             case 'Clim': return 8;
-            case 'Brulure': return 9;
-            case 'Autres': return 10;
+            case 'Brulure': return 8;
+            case 'autre': return 8;
             default: return 0; // Un ID par défaut
         }
     };
@@ -270,8 +270,8 @@ const SignalerUrgence: React.FC = () => {
                                 <IonButton type="button" expand="block" style={buttonStyle('BlackOut')} onClick={() => setProblemType('BlackOut')} aria-pressed={problemType === 'BlackOut'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>BlackOut</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Panne de courant générale</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>BlackOut</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Panne de courant générale</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
@@ -279,8 +279,8 @@ const SignalerUrgence: React.FC = () => {
                                 <IonButton type="button" expand="block" style={buttonStyle('Compteur')} onClick={() => setProblemType('Compteur')} aria-pressed={problemType === 'Compteur'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Compteur</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Défaut au niveau du compteur</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Compteur</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Défaut au niveau du compteur</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
@@ -290,8 +290,8 @@ const SignalerUrgence: React.FC = () => {
                                 <IonButton type="button" expand="block" style={buttonStyle('Lampe')} onClick={() => setProblemType('Lampe')} aria-pressed={problemType === 'Lampe'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Lampe</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Défaut éclairage</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Lampe</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Défaut éclairage</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
@@ -299,8 +299,8 @@ const SignalerUrgence: React.FC = () => {
                                 <IonButton type="button" expand="block" style={buttonStyle('Prise')} onClick={() => setProblemType('Prise')} aria-pressed={problemType === 'Prise'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Prise</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Défaut au niveau de la prise</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Prise</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Défaut au niveau de la prise</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
@@ -310,8 +310,8 @@ const SignalerUrgence: React.FC = () => {
                                 <IonButton type="button" expand="block" style={buttonStyle("Ventillo")} onClick={() => setProblemType('Ventillo')} aria-pressed={problemType === 'Ventillo'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Ventillo</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Panne de brasseur d'air</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Ventillo</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Panne de brasseur d'air</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
@@ -319,8 +319,8 @@ const SignalerUrgence: React.FC = () => {
                                 <IonButton type="button" expand="block" style={buttonStyle("Clim")} onClick={() => setProblemType('Clim')} aria-pressed={problemType === 'Clim'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Clim</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Défaut de climatisation</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Clim</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Défaut de climatisation</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
@@ -330,8 +330,8 @@ const SignalerUrgence: React.FC = () => {
                                 <IonButton type="button" expand="block" style={buttonStyle("Électroménager")} onClick={() => setProblemType('Électroménager')} aria-pressed={problemType === 'Électroménager'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Électroménager</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Appareils électriques et électroniques</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Électroménager</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Appareils électriques et électroniques</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
@@ -339,8 +339,8 @@ const SignalerUrgence: React.FC = () => {
                                 <IonButton type="button" expand="block" style={buttonStyle("Brulure")} onClick={() => setProblemType('Brulure')} aria-pressed={problemType === 'Brulure'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Brulure</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Flame, étincelle, etc</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Brulure</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Flame, étincelle, etc</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
@@ -350,20 +350,29 @@ const SignalerUrgence: React.FC = () => {
                                 <IonButton type="button" expand="block" style={buttonStyle("Solaire")} onClick={() => setProblemType('Solaire')} aria-pressed={problemType === 'Solaire'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Solaire</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Panneau solaire, batterie, conversatisseur, etc</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Solaire</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Panneau solaire, batterie, conversatisseur, etc</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
                             <IonCol size="6">
-                                <IonButton type="button" expand="block" style={buttonStyle("Autres")} onClick={() => setProblemType('Autres')} aria-pressed={problemType === 'Autres'}>
+                                <IonButton type="button" expand="block" style={buttonStyle("autre")} onClick={() => setProblemType('autre')} aria-pressed={problemType === 'autre'}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}>
                                         {/* <Power style={{ fontSize: '1.8em' }} /> */}
-                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Autres</IonLabel>
-                                        <small style={{ fontSize: '1em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Autres problèmes élètrique ou électronique</small>
+                                        <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Autre</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Autres problèmes élètrique ou électronique</small>
                                     </div>
                                 </IonButton>
                             </IonCol>
+                            {/* <IonCol size="6">
+                                <IonButton type="button" expand="block" style={buttonStyle("Autres")} onClick={() => setProblemType('Autres')} aria-pressed={problemType === 'Autres'}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px' }}> */}
+                                        {/* <Power style={{ fontSize: '1.8em' }} /> */}
+                                        {/* <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Autre</IonLabel>
+                                        <small style={{ fontSize: '0.7em', opacity: 0.8, textTransform: 'none', lineHeight: '1' }}>Autres problèmes élètrique ou électronique</small>
+                                    </div>
+                                </IonButton>
+                            </IonCol> */}
                         </IonRow>
                     </IonGrid>
 
@@ -378,11 +387,11 @@ const SignalerUrgence: React.FC = () => {
                         ></IonTextarea>
                     </IonItem> */}
 
-                    <IonButton 
-                        type="submit" 
-                        expand="block" 
-                        size="large" 
-                        className="ion-margin-top" 
+                    <IonButton
+                        type="submit"
+                        expand="block"
+                        size="large"
+                        className="ion-margin-top"
                         disabled={isSubmitting}
                         style={{ '--background': '#ffc409', '--color': '#000', '--border-radius': '10px', height: '50px', textTransform: 'none', fontSize: '1.2em', fontWeight: 'bold' }}
                     >

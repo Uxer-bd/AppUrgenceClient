@@ -52,7 +52,7 @@ const Accueil: React.FC = () => {
 
           <div className="ion-text-center" style={{ marginTop: '30px', paddingBottom: '20px' }}>
             <IonText style={{ color: '#666', fontSize: '1.1em' }}>
-              <p>Numéro d'urgence : <strong>(+226)74213460</strong></p>
+              <p>Numéro d'urgence : <strong>+226 74213460</strong></p>
             </IonText>
           </div>
         </div>
