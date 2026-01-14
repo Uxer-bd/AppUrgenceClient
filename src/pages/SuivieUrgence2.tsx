@@ -11,6 +11,9 @@ import { useHistory, useParams } from 'react-router-dom'; // Ajout de useLocatio
 
 import { IonModal } from '@ionic/react';
 
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
+
 // Interface des données API
 interface InterventionData {
   id: number;
@@ -45,9 +48,50 @@ interface Quote {
   items: QuoteItem[];
 }
 
+
 // Dans le composant SuivieUrgence
 
 const SuivieUrgence: React.FC = () => {
+
+  const prevStatus = React.useRef<string | null>(null);
+  const prevQuoteCount = React.useRef<number>(null);
+
+  useEffect(() => {
+    const initClientNotifications = async () => {
+      if (Capacitor.isNativePlatform()) {
+        await LocalNotifications.requestPermissions();
+        await LocalNotifications.createChannel({
+          id: 'client-updates',
+          name: 'Suivi Intervention',
+          importance: 5,
+          vibration: true,
+          visibility: 1
+        });
+      }
+    };
+    initClientNotifications();
+  }, []);
+
+  const triggerClientNotification = async (title: string, body: string) => {
+    if (Capacitor.isNativePlatform()) {
+      await LocalNotifications.schedule({
+        notifications: [{
+          title,
+          body,
+          id: Math.floor(Date.now() / 1000),
+          channelId: 'client-updates',
+          schedule: { at: new Date(Date.now() + 100) }
+        }]
+      });
+    } else {
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+      audio.play().catch(() => {});
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(title, { body });
+      }
+    }
+  };
+
   const history = useHistory();
 
   const [present] = useIonToast();
@@ -87,8 +131,15 @@ const SuivieUrgence: React.FC = () => {
       );
       if (response.ok) {
         const json = await response.json();
+        const newQuotes = json.quotes || json.data || [];
         setQuotes(json.data || json || []);
-      }
+
+        if (prevQuoteCount.current !== null && newQuotes.length > prevQuoteCount.current) {
+          triggerClientNotification("Nouveau devis !", "Vous avez reçu un devis pour votre intervention. Merci de le valider.");
+        }
+
+        prevQuoteCount.current = newQuotes.length;
+        }
     } catch (error) {
       console.error("Erreur chargement devis:", error);
     }
@@ -124,6 +175,29 @@ const SuivieUrgence: React.FC = () => {
       }
   };
 
+  const [alreadyRatedServer, setAlreadyRatedServer] = useState(false);
+
+  const checkExistingReview = useCallback(async () => {
+    if (!interventionId) return;
+    try {
+      const response = await fetch(`https://api.depannel.com/api/reviews/intervention/${interventionId}`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        const json = await response.json();
+        // Si l'API renvoie un objet (data ou id), l'avis existe
+        const reviewData = json.data || json;
+        if (reviewData && (reviewData.id || reviewData.rating)) {
+          setAlreadyRatedServer(true);
+        }
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification de l'avis:", error);
+    }
+  }, [interventionId]);
+
 // Appelez cette fonction dans votre useEffect de chargement initial
 
   // --- Fonction de chargement des données ---
@@ -138,6 +212,21 @@ const SuivieUrgence: React.FC = () => {
       if (response.ok) {
         const json = await response.json();
         const data = json.intervention || json.data || json;
+
+        console.log("Ancien statut:", prevStatus.current, "Nouveau:", data.status);
+
+        // Vérification des changements de statut pour notification
+        if (prevStatus.current !== null && prevStatus.current !== data.status) {
+          let statusMessage = "";
+          switch(data.status) {
+            case 'accepted': statusMessage = "Un technicien a été affecté à votre demande !"; break;
+            case 'in_progress': statusMessage = "Votre dépannage est en cours."; break;
+            case 'completed': statusMessage = "L'intervention est terminée. Merci de nous donner votre avis !"; break;
+          }
+          if (statusMessage) triggerClientNotification("Mise à jour intervention", statusMessage);
+        }
+
+        prevStatus.current = data.status;
         setIntervention(data);
       }
     } catch (error) {
@@ -171,10 +260,13 @@ const SuivieUrgence: React.FC = () => {
       });
 
       if (!response.ok) throw new Error("Erreur lors de l'envoi de l'avis");
-
-      present({ message: "Merci ! Votre avis a été enregistré.", color: 'success', duration: 3000 });
-      setHasRated(true);
-      setShowRatingModal(false);
+      if(response.ok){
+        present({ message: "Merci ! Votre avis a été enregistré.", color: 'success', duration: 3000 });
+        setHasRated(true);
+        setShowRatingModal(false);
+        setAlreadyRatedServer(true);
+      }
+      
     } catch (error) {
       present({ message: "Impossible d'envoyer la note pour le moment.", color: 'danger', duration: 3000 });
     } finally {
@@ -189,7 +281,7 @@ const SuivieUrgence: React.FC = () => {
 
   // 1. Chargement initial avec loader
   setIsLoading(true);
-  Promise.all([fetchInterventionStatus(), fetchQuotes()]).finally(() => {
+  Promise.all([fetchInterventionStatus(), fetchQuotes(), checkExistingReview()]).finally(() => {
     setIsLoading(false);
   });
 
@@ -203,14 +295,14 @@ const SuivieUrgence: React.FC = () => {
   }, 10000); // 10 secondes
 
   return () => clearInterval(intervalId); // Nettoyage
-}, [interventionId, clientPhone, fetchInterventionStatus, fetchQuotes, intervention?.status]);
+}, [interventionId, clientPhone, fetchInterventionStatus, fetchQuotes, checkExistingReview, intervention?.status]);
 
   useEffect(() => {
       // Si l'intervention est terminée et que le client n'a pas encore noté
-      if (intervention?.status === 'completed' && !hasRated && !isDismissed) {
+      if (intervention?.status === 'completed' && !hasRated && !isDismissed && !alreadyRatedServer) {
       setShowRatingModal(true);
     }
-  }, [intervention?.status, hasRated, isDismissed]);
+  }, [intervention?.status, hasRated, isDismissed, alreadyRatedServer]);
 
   // --- Logique d'affichage du statut (Timeline) ---
   const getSteps = () => {
