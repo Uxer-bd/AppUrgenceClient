@@ -41,6 +41,7 @@ import Accueil from './pages/Accueil';
 import SignaleUrgence from './pages/SignaleUrgence';
 import SuivieUrgence from './pages/SuivieUrgence2';
 import InterventionListPage from './pages/InterventionsListPage';
+import About from './pages/About';
 
 setupIonicReact();
 
@@ -49,6 +50,9 @@ const App: React.FC = () => (
     <IonReactRouter>
       <IonTabs>
         <IonRouterOutlet>
+          <Route exact path="/about">
+            <About />
+          </Route>
           <Route exact path="/accueil">
             <Accueil/>
           </Route>

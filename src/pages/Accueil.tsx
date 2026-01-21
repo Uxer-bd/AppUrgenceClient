@@ -1,6 +1,6 @@
 import React from 'react';
-import { IonContent, IonPage, IonButton, IonIcon, IonText, IonHeader, IonToolbar, IonTitle } from '@ionic/react';
-import { warningOutline, callOutline } from 'ionicons/icons';
+import { IonContent, IonPage, IonButton, IonIcon, IonText, IonHeader, IonToolbar, IonTitle, IonButtons } from '@ionic/react';
+import { warningOutline, callOutline, briefcaseOutline, informationCircleOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 // import { AlignCenter } from 'lucide-react';
 
@@ -15,17 +15,25 @@ const Accueil: React.FC = () => {
     window.location.href = 'tel:74213460';
   };
 
+  const recrutement = () => {
+    window.location.href = 'https://tally.so/r/1A9A61';
+  };
+
   return (
     <IonPage>
       <IonHeader>
           <IonToolbar color="primary">
               <IonTitle>DEPANNEL</IonTitle>
+              <IonButtons slot="end" style={{ marginRight: "20px" }} onClick={() => history.push('/about')}>
+                  <IonIcon slot="icon-only" icon={informationCircleOutline} />
+                  A propos
+              </IonButtons>
           </IonToolbar>
       </IonHeader>
       <IonContent fullscreen className="ion-padding" style={{ '--background': '#f4f5f8', display: 'flex', flexDirection: 'column', justifyContent: 'center', AlignCenter: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', alignItems: 'center' }}>
           <div className="ion-text-center" style={{ marginBottom: '50px' }}>
-            <h1 style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>Service d'Urgence Électrique</h1>
+            <h1 style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>Service de dépannage et d'urgence électrique</h1>
             <p style={{ fontSize: '1.2em', color: '#666' }}>Assistance 24h/24 - 7j/7</p>
           </div>
 
@@ -36,7 +44,7 @@ const Accueil: React.FC = () => {
             onClick={handleSignaler}
           >
             <IonIcon icon={warningOutline} slot="start" />
-            Signaler une urgence
+            Signaler une panne / une Urgence électrique
           </IonButton>
 
           <IonButton
@@ -48,6 +56,16 @@ const Accueil: React.FC = () => {
           >
             <IonIcon icon={callOutline} slot="start" />
             Appeler maintenant
+          </IonButton>
+          <IonButton
+            expand="block"
+            size="large"
+            className="ion-margin-top"
+            style={{ '--background': '#479e00', '--color': '#fff', '--border-radius': '15px', height: '100px', width:'70%', textTransform: 'none', fontSize: '1.4em', fontWeight: 'bold' }}
+            onClick={recrutement}
+          >
+            <IonIcon icon={briefcaseOutline} slot="start" />
+            Récrutement Technicien
           </IonButton>
 
           <div className="ion-text-center" style={{ marginTop: '30px', paddingBottom: '20px' }}>
