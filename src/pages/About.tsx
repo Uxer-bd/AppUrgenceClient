@@ -14,7 +14,7 @@ const About: React.FC = () => {
           <IonButtons slot="start">
             <IonBackButton defaultHref="/signaler-urgence" />
           </IonButtons>
-          <IonTitle>À propos de Depannel</IonTitle>
+          <IonTitle>À propos de Depannel Orit</IonTitle>
         </IonToolbar>
       </IonHeader>
 
