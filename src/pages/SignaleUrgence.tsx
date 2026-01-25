@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     IonContent, IonPage, IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonItem,
     IonLabel, IonInput, IonButton, useIonToast, IonLoading
@@ -11,8 +11,7 @@ import {
     IonModal, IonList, IonRadioGroup, IonRadio, IonIcon 
 } from '@ionic/react';
 import { 
-    chevronForwardOutline, flashOutline, alertCircleOutline, settingsOutline, 
-    bulbOutline, constructOutline, sunnyOutline, snowOutline, flameOutline 
+    chevronForwardOutline, alertCircleOutline,
 } from 'ionicons/icons';
 
 // Interface pour le futur appel API
@@ -38,12 +37,34 @@ const SignalerUrgence: React.FC = () => {
     
     // Autres états
     const [adresse, setAdresse] = useState('');
-    const [problemType, setProblemType] = useState<string | null>(null);
+    const [problemTypes, setProblemTypes] = useState<ProblemType[]>([]);
+    const [selectedProblemType, setSelectedProblemType] = useState('');
+    const [isLoadingTypes, setIsLoadingTypes] = useState(true);
     // const [description, setdescription] = useState('');
     const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
     const [isLocating, setIsLocating] = useState(false);
     const [localisation, setLocalisation] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+
+        const fetchProblemTypes = async () => {
+            try {
+                const response = await fetch('https://api.depannel.com/api/problem-types?active_only=true', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const result = await response.json();
+                // On récupère le tableau dans result.data comme montré dans votre capture Swagger
+                setProblemTypes(result.data || []);
+            } catch (error) {
+                console.error("Erreur lors du chargement des types:", error);
+            } finally {
+                setIsLoadingTypes(false);
+            }
+        };
+
+        fetchProblemTypes();
+    }, []);
 
     // Fonction utilitaire pour sauvegarder les infos de contact
     const saveReporterInfo = (phone: string, name: string) => {
@@ -53,44 +74,13 @@ const SignalerUrgence: React.FC = () => {
 
     const [showTypeModal, setShowTypeModal] = useState(false);
 
-    // Liste temporaire (sera remplacée par ton fetch API plus tard)
-    const problemTypes: ProblemType[] = [
-        { id: 1, name: 'BlackOut', description: 'Panne de courant générale', icon: flashOutline },
-        { id: 2, name: 'Compteur', description: 'Défaut au niveau du compteur', icon: settingsOutline },
-        { id: 3, name: 'Lampe', description: 'Défaut éclairage', icon: bulbOutline },
-        { id: 4, name: 'Prise', description: 'Défaut au niveau de la prise', icon: constructOutline },
-        { id: 7, name: 'Solaire', description: 'Panneaux, batteries, etc.', icon: sunnyOutline },
-        { id: 8, name: 'Clim', description: 'Défaut de climatisation', icon: snowOutline },
-        { id: 9, name: 'Brulure', description: 'Flamme, étincelle, etc.', icon: flameOutline },
-        { id: 10, name: 'Autre', description: 'Autres problèmes électriques', icon: alertCircleOutline },
-    ];
-
-    const selectedProblem = problemTypes.find(t => t.name === problemType);
-
-    const getProblemTypeId = (problemName: string): number => {
-        switch (problemName) {
-            case 'BlackOut': return 1;
-            case 'Compteur': return 2;
-            case 'Lampe': return 3;
-            case 'Prise': return 4;
-            case 'Ventillo': return 5;
-            case 'Électroménager': return 6;
-            case 'Solaire': return 7;
-            case 'Clim': return 8;
-            case 'Brulure': return 8;
-            case 'autre': return 8;
-            default: return 0; // Un ID par défaut
-        }
-    };
-
-
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
         if (isSubmitting) return;
 
         // Validation simple
-        if (!problemType || !telephone || !adresse) {
+        if (!selectedProblemType || !telephone || !adresse) {
             present({
                 message: 'Veuillez remplir le type de problème, le téléphone et l\'adresse.',
                 duration: 2000,
@@ -101,12 +91,19 @@ const SignalerUrgence: React.FC = () => {
 
         setIsSubmitting(true);
 
+        const typeId = problemTypes.find(t => t.name === selectedProblemType)?.id;
+
+        if (!typeId) {
+            present({ message: "Type de problème invalide", color: 'danger' });
+            return;
+        }
+
         // Retrait du TOKEN et de l'en-tête Authorization
         const API_URL = 'https://api.depannel.com/api/interventions';
 
         const urgenceData = {
-            problem_type_id: getProblemTypeId(problemType!),
-            title: problemType,
+            problem_type_id: typeId,
+            title: selectedProblemType,
             description: 'a', // Description non utilisée
             address: adresse,
             latitude: position?.lat || 0,
@@ -180,7 +177,7 @@ const SignalerUrgence: React.FC = () => {
 
             const locationString = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
             setLocalisation(locationString);
-            
+
             // Mise à jour de l'adresse par défaut si l'utilisateur ne l'a pas encore remplie
             // if (!adresse) setAdresse(locationString);
 
@@ -292,27 +289,27 @@ const SignalerUrgence: React.FC = () => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            border: problemType ? '2px solid #3880ff' : '1px solid #ddd',
+                            border: selectedProblemType ? '2px solid #3880ff' : '1px solid #ddd',
                             boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                             cursor: 'pointer'
                         }}
                     >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                             <div style={{ 
-                                background: problemType ? '#3880ff' : '#f4f5f8', 
+                                background: selectedProblemType ? '#3880ff' : '#f4f5f8', 
                                 padding: '10px', 
                                 borderRadius: '10px',
                                 marginRight: '15px',
-                                color: problemType ? '#fff' : '#666'
+                                color: selectedProblemType ? '#fff' : '#666'
                             }}>
-                                <IonIcon icon={selectedProblem?.icon || alertCircleOutline} size="large" />
+                                <IonIcon icon={problemTypes.find(p => p.name === selectedProblemType)?.icon || alertCircleOutline} size="large" />
                             </div>
                             <div>
                                 <div style={{ fontWeight: 'bold', fontSize: '1.1em', color: '#000' }}>
-                                    {problemType || "Choisir le type de panne"}
+                                    {selectedProblemType || "Choisir le type de panne"}
                                 </div>
                                 <small style={{ color: '#666' }}>
-                                    {selectedProblem?.description || "Cliquez pour sélectionner"}
+                                    {problemTypes.find(p => p.name === selectedProblemType)?.description || "Cliquez pour sélectionner"}
                                 </small>
                             </div>
                         </div>
@@ -330,8 +327,8 @@ const SignalerUrgence: React.FC = () => {
                     </IonButton>
                 </form>
                 {/* Modal de sélection du type de problème */}
-                <IonModal 
-                    isOpen={showTypeModal} 
+                <IonModal
+                    isOpen={showTypeModal}
                     onDidDismiss={() => setShowTypeModal(false)}
                     breakpoints={[0, 0.5, 0.8]}
                     initialBreakpoint={0.8}
@@ -346,23 +343,24 @@ const SignalerUrgence: React.FC = () => {
                     </IonHeader>
                     <IonContent className="ion-padding">
                         <IonList lines="full">
-                            <IonRadioGroup value={problemType} onIonChange={e => {
-                                setProblemType(e.detail.value);
-                                setShowTypeModal(false);
-                            }}>
-                                {problemTypes
-                                    .filter(t => t.name.toLowerCase())
-                                    .map((type) => (
-                                    <IonItem key={type.id}>
-                                        <IonIcon icon={type.icon || alertCircleOutline} slot="start" color="primary" />
-                                        <IonLabel>
-                                            <h2>{type.name}</h2>
-                                            <p>{type.description}</p>
-                                        </IonLabel>
-                                        <IonRadio slot="end" value={type.name} />
-                                    </IonItem>
-                                ))}
-                            </IonRadioGroup>
+                            {isLoadingTypes ? (
+                                <div className="ion-text-center ion-padding">Chargement des pannes...</div>
+                            ) : (
+                                <IonRadioGroup value={selectedProblemType} onIonChange={e => {
+                                    setSelectedProblemType(e.detail.value);
+                                    setShowTypeModal(false);
+                                }}>
+                                    {problemTypes.map((type) => (
+                                        <IonItem key={type.id}>
+                                            <IonLabel>
+                                                <h2>{type.name}</h2>
+                                                <p>{type.description}</p>
+                                            </IonLabel>
+                                            <IonRadio slot="end" value={type.name} />
+                                        </IonItem>
+                                    ))}
+                                </IonRadioGroup>
+                            )}
                         </IonList>
                     </IonContent>
                 </IonModal>

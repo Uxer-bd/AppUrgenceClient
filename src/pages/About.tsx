@@ -1,8 +1,8 @@
 import React from 'react';
 import {
   IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButtons, 
-  IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, 
-  IonCardContent, IonList, IonItem, IonIcon, IonLabel, IonText
+  IonBackButton, IonCard, IonCardHeader, IonCardTitle, 
+  IonCardContent, IonList, IonItem, IonIcon, IonLabel, IonText, IonListHeader, 
 } from '@ionic/react';
 import { globeOutline, shieldCheckmarkOutline, mailOutline, helpCircleOutline } from 'ionicons/icons';
 
@@ -14,7 +14,7 @@ const About: React.FC = () => {
           <IonButtons slot="start">
             <IonBackButton defaultHref="/signaler-urgence" />
           </IonButtons>
-          <IonTitle>À propos de Depannel Orit</IonTitle>
+          <IonTitle>À propos de Depannel</IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -27,12 +27,78 @@ const About: React.FC = () => {
 
         <IonCard>
           <IonCardHeader>
-            <IonCardSubtitle>Notre Mission</IonCardSubtitle>
-            <IonCardTitle>Urgence Électrique</IonCardTitle>
+            <IonCardTitle>Qui sommes nous ?</IonCardTitle>
           </IonCardHeader>
           <IonCardContent>
-            Depannel est une plateforme innovante conçue pour simplifier la mise en relation entre les clients ayant une urgence électrique et des électriciens qualifiés. 
-            Nous garantissons une intervention rapide et sécurisée.
+            Nous sommes le meilleur SERVICE DE DEPANNAGE spécialisé dans le domaine de l’électricité fondé par le groupe ELECTRICAL ENGENEERING UNIT.
+            Notre réseau de techniciens très efficaces et très polyvalents nous permet d’intervenir avec rapidité et professionnalisme au bonheur de nos clients. 
+            Notre particularité réside dans la fluidité de nos interventions avec notre merveilleuse plateforme disponible 24H/24 -7j/7 qui vous permet de signaler 
+            votre préoccupation et de suivre l’évolution de votre besoin sans vous déplacer, de l’affectation d’un technicien spécialisé à la résolution de votre préoccupation. 
+          </IonCardContent>
+        </IonCard>
+
+        <IonList lines="full" className="ion-margin-top">
+        <IonListHeader>
+          <IonLabel color="primary" style={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+            Nos Services
+          </IonLabel>
+        </IonListHeader>
+
+        <IonItem>
+          <IonLabel>
+            <h2>Dépannage électricité Bâtiment </h2>
+          </IonLabel>
+        </IonItem>
+        <IonItem>
+          <IonLabel>
+            <h2>Dépannage électroménager </h2>
+            </IonLabel>
+          </IonItem>
+          <IonItem>
+            <IonLabel>
+              <h2>Dépannage électronique et informatique</h2>
+            </IonLabel>
+          </IonItem>
+          <IonItem>
+            <IonLabel>
+              <h2>Dépannage froid et climatisation </h2>
+            </IonLabel>
+          </IonItem>
+          <IonItem>
+            <IonLabel>
+              <h2>Dépannage électricité industrielle</h2>
+            </IonLabel>
+          </IonItem>
+          <IonItem>
+            <IonLabel>
+              <h2>Dépannage groupe électrogène</h2>
+            </IonLabel>
+          </IonItem>
+          <IonItem>
+            <IonLabel>
+              <h2>Dépannage installation solaire </h2>
+            </IonLabel>
+          </IonItem>
+          <IonItem>
+            <IonLabel>
+              <h2>Dépannage divers </h2>
+            </IonLabel>
+          </IonItem>
+        </IonList>
+
+        <IonCard>
+          <IonCardHeader>
+            {/* <IonCardSubtitle>Notre Mission</IonCardSubtitle> */}
+            <IonCardTitle>Le Groupe E1'ing</IonCardTitle>
+          </IonCardHeader>
+          <IonCardContent>
+            ELECTRICAL ENGINEERING UNIT (E1’ING) est une société experte en énergie et solutions électriques installé au Burkina Faso depuis 2019 par un groupe de jeunes ingénieurs de plusieurs domaines dont l’électricité, l’électronique et l’information et l’électromécanique. 
+            Sa particularité réside dans l’agilité de ses équipes, la force de sa jeunesse, et l’innovation dans la fourniture de solutions et de services dans de l’électricité.
+            En si peu de temps, E1’ING s’est fait connaitre dans le secteur de l’électricité industrielle grâce au dynamisme de son personnel, à la qualité de ses fournitures strictement conformes aux normes internationales, 
+            À la rigueur dans ses installations, et aux brassages des innovations 
+            Multidisciplinaires : électricité, électronique, et mécaniques.
+            Ainsi, elle a participé à des projets d’envergures 	au Burkina Faso. Son siège est à Bobo Dioulasso et représenté dans la plupart des grandes villes du pays.
+
           </IonCardContent>
         </IonCard>
 
