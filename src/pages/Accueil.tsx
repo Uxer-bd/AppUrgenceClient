@@ -44,7 +44,7 @@ const Accueil: React.FC = () => {
             onClick={handleSignaler}
           >
             <IonIcon icon={warningOutline} slot="start" />
-            Signaler une panne / une Urgence électrique
+            Signaler une panne
           </IonButton>
 
           <IonButton
@@ -61,11 +61,11 @@ const Accueil: React.FC = () => {
             expand="block"
             size="large"
             className="ion-margin-top"
-            style={{ '--background': '#479e00', '--color': '#fff', '--border-radius': '15px', height: '100px', width:'70%', textTransform: 'none', fontSize: '1.4em', fontWeight: 'bold' }}
+            style={{ '--background': '#bababa', '--color': '#000000', '--border-radius': '15px', height: '100px', width:'70%', textTransform: 'none', fontSize: '1.4em', fontWeight: 'bold' }}
             onClick={recrutement}
           >
             <IonIcon icon={briefcaseOutline} slot="start" />
-            Récrutement Technicien
+            Recrutement
           </IonButton>
 
           <div className="ion-text-center" style={{ marginTop: '30px', paddingBottom: '20px' }}>
