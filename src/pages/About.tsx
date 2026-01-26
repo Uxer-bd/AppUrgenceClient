@@ -4,7 +4,7 @@ import {
   IonBackButton, IonCard, IonCardHeader, IonCardTitle, 
   IonCardContent, IonList, IonItem, IonIcon, IonLabel, IonText, IonListHeader, 
 } from '@ionic/react';
-import { globeOutline, logoWhatsapp, mailOutline, helpCircleOutline } from 'ionicons/icons';
+import { globeOutline, logoWhatsapp, mailOutline } from 'ionicons/icons';
 
 const About: React.FC = () => {
   return (

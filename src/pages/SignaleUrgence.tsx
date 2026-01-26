@@ -330,8 +330,9 @@ const SignalerUrgence: React.FC = () => {
                 <IonModal
                     isOpen={showTypeModal}
                     onDidDismiss={() => setShowTypeModal(false)}
-                    breakpoints={[0, 0.5, 0.8]}
+                    breakpoints={[0, 0.5, 0.8, 1]}
                     initialBreakpoint={0.8}
+                    handleBehavior="cycle"
                 >
                     <IonHeader>
                         <IonToolbar>
@@ -362,6 +363,7 @@ const SignalerUrgence: React.FC = () => {
                                 </IonRadioGroup>
                             )}
                         </IonList>
+                        <div style={{ height:'40px' }}></div>
                     </IonContent>
                 </IonModal>
             </IonContent>
