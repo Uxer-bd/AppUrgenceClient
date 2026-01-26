@@ -104,7 +104,7 @@ const SignalerUrgence: React.FC = () => {
         const urgenceData = {
             problem_type_id: typeId,
             title: selectedProblemType,
-            description: 'a', // Description non utilisée
+            description: "a", // Description non utilisée
             address: adresse,
             latitude: position?.lat || 0,
             longitude: position?.lng || 0,

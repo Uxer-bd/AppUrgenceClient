@@ -4,7 +4,7 @@ import {
   IonBackButton, IonCard, IonCardHeader, IonCardTitle, 
   IonCardContent, IonList, IonItem, IonIcon, IonLabel, IonText, IonListHeader, 
 } from '@ionic/react';
-import { globeOutline, shieldCheckmarkOutline, mailOutline, helpCircleOutline } from 'ionicons/icons';
+import { globeOutline, logoWhatsapp, mailOutline, helpCircleOutline } from 'ionicons/icons';
 
 const About: React.FC = () => {
   return (
@@ -108,19 +108,19 @@ const About: React.FC = () => {
             <IonLabel>Site Web Officiel</IonLabel>
           </IonItem>
           
-          <IonItem button>
+          {/* <IonItem button>
             <IonIcon icon={shieldCheckmarkOutline} slot="start" color="primary" />
             <IonLabel>Conditions Générales</IonLabel>
-          </IonItem>
+          </IonItem> */}
 
-          <IonItem button href="mailto:contact@depannel.com">
+          <IonItem button href="mailto:depannel.bf@gmail.com">
             <IonIcon icon={mailOutline} slot="start" color="primary" />
             <IonLabel>Nous contacter</IonLabel>
           </IonItem>
 
-          <IonItem button>
-            <IonIcon icon={helpCircleOutline} slot="start" color="primary" />
-            <IonLabel>FAQ</IonLabel>
+          <IonItem button onClick={() => window.open('https://wa.me/22674213460', '_blank')}>
+            <IonIcon icon={logoWhatsapp} slot="start" color="primary" />
+            <IonLabel>Whatsapp</IonLabel>
           </IonItem>
         </IonList>
 

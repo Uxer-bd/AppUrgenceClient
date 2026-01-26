@@ -21,7 +21,7 @@ const Accueil: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
+      <IonHeader style={{ marginBottom:'50px' }}>
           <IonToolbar color="primary">
               <IonTitle>DEPANNEL</IonTitle>
               <IonButtons slot="end" style={{ marginRight: "20px" }} onClick={() => history.push('/about')}>

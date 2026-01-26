@@ -17,6 +17,7 @@ interface Intervention {
     reference: string;
     description: string;
     address: string;
+    title: string;
     status: 'pending' | 'accepted' | 'in-progress' | 'completed' | 'closed' | string;
     created_at: string;
     client_name?: string; 
@@ -273,7 +274,8 @@ const InterventionListPage: React.FC = () => {
                                     <IonIcon icon={locateOutline} slot="start" color="medium" />
                                     <IonLabel>
                                         <h2>{inter.reference || `#${inter.id}`} - {inter.address}</h2>
-                                        <p>{inter.description.substring(0, 50)}...</p>
+                                        {/* <p>{inter.description.substring(0, 50)}...</p> */}
+                                        <p>Type de problème : {inter.title}</p>
                                         <IonNote color="medium">
                                             Demandeur: {requesterDisplay}
                                             {inter.assigned_agent && ` | Assigné à: ${inter.assigned_agent.name}`}
